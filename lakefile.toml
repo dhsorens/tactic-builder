@@ -1,0 +1,10 @@
+name = "TacticBuilder"
+version = "0.1.0"
+defaultTargets = ["tacticbuilder"]
+
+[[lean_lib]]
+name = "TacticBuilder"
+
+[[lean_exe]]
+name = "tacticbuilder"
+root = "Main"
