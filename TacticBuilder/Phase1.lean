@@ -1,15 +1,17 @@
 /-
-  examples of proofs and their corresponding proof terms
+  Phase 1: Proofs and proof terms.
+  Each block shows the same theorem proved with tactics (`by ...`) and as a direct proof term.
+  Understanding this correspondence is the basis for building tactics that construct proof terms.
 -/
 
--- implication
+-- Implication: applying a hypothesis
 example (P Q : Prop) (h₁ : P) (h₂ : P → Q) : Q := by
   exact h₂ h₁
 
 example (P Q : Prop) (h₁ : P) (h₂ : P → Q) : Q :=
   h₂ h₁
 
--- commutativity of ∧
+-- Conjunction: destruct with rcases, build with constructor
 example (P Q : Prop) : P ∧ Q → Q ∧ P := by
   intro h
   rcases h with ⟨hP, hQ⟩
@@ -18,6 +20,99 @@ example (P Q : Prop) : P ∧ Q → Q ∧ P := by
   · exact hP
 
 example (P Q : Prop) : P ∧ Q → Q ∧ P :=
-  fun h =>
-    match h with
-    | ⟨hP, hQ⟩ => ⟨hQ, hP⟩
+  fun h => match h with | ⟨hP, hQ⟩ => ⟨hQ, hP⟩
+
+-- Disjunction: intro left/right, eliminate with rcases
+example (P Q : Prop) (h : P ∨ Q) : Q ∨ P := by
+  rcases h with hP | hQ
+  · right; exact hP
+  · left; exact hQ
+
+example (P Q : Prop) (h : P ∨ Q) : Q ∨ P :=
+  match h with
+  | Or.inl hP => Or.inr hP
+  | Or.inr hQ => Or.inl hQ
+
+-- Negation: intro gives a function, using ¬P is applying it
+example (P : Prop) (h : P → False) : ¬P := by
+  intro p
+  exact h p
+
+example (P : Prop) (h : P → False) : ¬P :=
+  h
+
+-- Iff: two implications
+example (P Q : Prop) (h : P ↔ Q) : Q ↔ P := by
+  rcases h with ⟨pq, qp⟩
+  constructor
+  · exact qp
+  · exact pq
+
+example (P Q : Prop) (h : P ↔ Q) : Q ↔ P :=
+  match h with
+  | ⟨pq, qp⟩ => ⟨qp, pq⟩
+
+-- True and False
+example : True := by exact trivial
+example : True := trivial
+
+example (P : Prop) (h : False) : P := by exact False.elim h
+example (P : Prop) (h : False) : P := False.elim h
+
+-- Universal quantification: intro/apply
+example (α : Type) (P : α → Prop) (x : α) (h : ∀ z, P z) : P x := by
+  exact h x
+
+example (α : Type) (P : α → Prop) (x : α) (h : ∀ z, P z) : P x :=
+  h x
+
+-- Existential: use gives a witness, obtain/rcases eliminates
+example (α : Type) (P : α → Prop) (a : α) (ha : P a) : ∃ x, P x := by
+  exact ⟨a, ha⟩
+
+example (α : Type) (P : α → Prop) (a : α) (ha : P a) : ∃ x, P x :=
+  ⟨a, ha⟩
+
+example (Q : Prop) (h : ∃ x : Nat, x = 0) : Q → Q := by
+  rcases h with ⟨n, hn⟩
+  intro q
+  exact q
+
+example (Q : Prop) (h : ∃ x : Nat, x = 0) : Q → Q :=
+  fun h' => match h with | ⟨_, _⟩ => h'
+
+-- Definitional equality: both sides are the same once reduced
+example (n : Nat) : n = n := by rfl
+example (n : Nat) : n = n := rfl
+
+/- -----------------------------------------------------------------------
+   Exercises
+   - -----------------------------------------------------------------------
+   Below are tactic proofs. Convert each to a direct proof term (no `by`).
+   Uncomment and fill in the `sorry` or replace the placeholder.
+-/
+
+-- 1. Implication: prove Q from P and P → Q → R and Q → R (or similar chain).
+example (P Q R : Prop) (hP : P) (hPQ : P → Q) (hQR : Q → R) : R := by
+  exact hQR (hPQ hP)
+-- Now as a proof term:
+-- example (P Q R : Prop) (hP : P) (hPQ : P → Q) (hQR : Q → R) : R :=
+
+-- 2. Conjunction: prove P ∧ Q from (P ∧ Q) ∧ R.
+example (P Q R : Prop) (h : (P ∧ Q) ∧ R) : P ∧ Q := by
+  exact h.1
+-- example (P Q R : Prop) (h : (P ∧ Q) ∧ R) : P ∧ Q :=
+
+-- 3. Disjunction: prove P ∨ Q → Q ∨ P (symmetry of ∨).
+example (P Q : Prop) : P ∨ Q → Q ∨ P := by
+  intro h
+  rcases h with hP | hQ
+  · exact Or.inr hP
+  · exact Or.inl hQ
+-- example (P Q : Prop) : P ∨ Q → Q ∨ P :=
+
+-- 4. Combine: from ∃ x, P x and (∀ y, P y → Q) prove Q.
+example (α : Type) (P : α → Prop) (Q : Prop) (hex : ∃ x, P x) (h : ∀ y, P y → Q) : Q := by
+  rcases hex with ⟨x, hPx⟩
+  exact h x hPx
+-- example (α : Type) (P : α → Prop) (Q : Prop) (hex : ∃ x, P x) (h : ∀ y, P y → Q) : Q :=

@@ -1,14 +1,17 @@
-# Tactic Building
+# Tactic Tutorial
 
-Some examples of building tactics in Lean, for someone who can prove theorems in Lean but cannot yet write tactics.
+This is a tutorial for building tactics in Lean. It contains examples and exercises, for someone who can prove theorems in Lean but cannot yet write tactics.
 
 ## Phases
 
-- Phase 1 - proofs and proof terms. Examples of simple proofs and their corresponding proof terms
-- Phase 2 - tactics as syntactic wrappers. Some very simple tactics that just serve as wrappers to other tactics, illustrating how `elab ... : tactic` works, how to run existing tactics in your own tactic, and how tactic syntax quotations work.
-- Phase 3 - tactics that inspect the proof goal a little. 
-- Phase 4 - typed quotations and antiquotations
-- Phase 5 - build tiny automation tactics
+Read through each of these phases and complete the exercises.
+
+- [Phase 1](TacticBuilder/Phase1.lean) - proofs and proof terms. Examples of simple proofs and their corresponding proof terms
+- [Phase 2](TacticBuilder/Phase2.lean) - tactics as syntactic wrappers. Some very simple tactics that just serve as wrappers to other tactics, illustrating how `elab ... : tactic` works, how to run existing tactics in your own tactic, and how tactic syntax quotations work.
+- [Phase 3](TacticBuilder/Phase3.lean) - tactics that inspect the proof goal a little. 
+- [Phase 4](TacticBuilder/Phase4.lean) - typed quotations and antiquotations
+- [Phase 5](TacticBuilder/Phase5.lean) - build tiny automation tactics
+- [Phase 6](TacticBuilder/Phase6.lean) - advanced execrises
 
 
 ## Sources:
