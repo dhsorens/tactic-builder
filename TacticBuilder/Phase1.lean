@@ -86,6 +86,16 @@ example (h : ∃ x : Nat, x = 0) : 0 = 0 :=
 example (n : Nat) : n = n := by rfl
 example (n : Nat) : n = n := rfl
 
+-- Using an equality to substitute (transport): prove p b from h : a = b and hp : p a.
+-- Tactic mode ("by ..."): rw [← h] rewrites the goal to p a, then exact hp.
+-- Term mode: h ▸ hp is the transport operator (Eq.subst)—the proof-term analogue of "rewrite with h".
+example {T} (a b : T) (p : T → Prop) (h : a = b) (hp : p a) : p b := by
+  rw [← h]
+  exact hp
+
+example {T} (a b : T) (p : T → Prop) (h : a = b) (hp : p a) : p b :=
+  h ▸ hp
+
 /- -----------------------------------------------------------------------
    Exercises
    - -----------------------------------------------------------------------
