@@ -73,3 +73,18 @@ example (P : Prop) : P → P := by my_intro_assump
 
 -- 4. A tactic that runs `intro` then `assumption` (for goals of the form P → P with P in context)
 -- example (Q : Prop) (hQ : Q) : Q → Q := by sorry
+
+-- 5. Combine two tactics: define "trivial_or_rfl" that tries my_trivial, and if it fails runs my_rfl.
+--    (Use first | my_trivial | my_rfl so both of the above wrappers are used in one tactic.)
+-- example : True := by trivial_or_rfl
+-- example (n : Nat) : n = n := by trivial_or_rfl
+
+-- 6. Define a tactic that runs constructor then all_goals rfl (for goals that are a conjunction of definitional equalities).
+-- example (a b : Nat) : a = a ∧ b = b := by sorry
+
+-- 7. Define a tactic that does intro twice then assumption (for goals P → Q → R when R is in context).
+-- example (P Q R : Prop) (hR : R) : P → Q → R := by sorry
+
+-- 8. Define a tactic that tries assumption; if that fails, runs constructor then all_goals assumption.
+--    So it closes either a single goal from the context or a conjunction of goals from the context.
+-- example (P Q : Prop) (hP : P) (hQ : Q) : P ∧ Q := by sorry
