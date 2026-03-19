@@ -73,13 +73,14 @@ example (α : Type) (P : α → Prop) (a : α) (ha : P a) : ∃ x, P x := by
 example (α : Type) (P : α → Prop) (a : α) (ha : P a) : ∃ x, P x :=
   ⟨a, ha⟩
 
-example (Q : Prop) (h : ∃ x : Nat, x = 0) : Q → Q := by
+-- Eliminate ∃: get witness and proof; use the proof (hn : n = 0) to build a goal in Prop.
+-- (Lean only lets us eliminate ∃ into Prop, not into Type like Nat.)
+example (h : ∃ x : Nat, x = 0) : 0 = 0 := by
   rcases h with ⟨n, hn⟩
-  intro q
-  exact q
+  exact Eq.trans (Eq.symm hn) hn
 
-example (Q : Prop) (h : ∃ x : Nat, x = 0) : Q → Q :=
-  fun h' => match h with | ⟨_, _⟩ => h'
+example (h : ∃ x : Nat, x = 0) : 0 = 0 :=
+  match h with | ⟨_, hn⟩ => Eq.trans (Eq.symm hn) hn
 
 -- Definitional equality: both sides are the same once reduced
 example (n : Nat) : n = n := by rfl
