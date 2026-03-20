@@ -74,6 +74,70 @@ example : True := by prove_true_or_rfl
 example (n : Nat) : n = n := by prove_true_or_rfl
 
 -- -----------------------------------------------------------------------
+-- Local context: getLCtx, inferType, isExprDefEq
+-- -----------------------------------------------------------------------
+-- `getLCtx` (MetaM): the hypotheses and let-bindings in scope for the *current*
+-- metavariable — use `goal.withContext` or `withMainContext` so it matches the goal.
+--
+-- `LocalDecl` entries carry `userName`, `fvarId`, `type`, and `toExpr` (the `Expr` for
+-- that hypothesis, suitable for `exact` / `assign`).
+--
+-- `inferType e` (MetaM): compute the type of an arbitrary expression `e` (elaboration
+-- / metavariable state aware). Contrast with `localDecl.type`, which is the recorded
+-- type of a hypothesis.
+--
+-- `isExprDefEq t s` (MetaM): true iff `t` and `s` are *definitionally equal* in the
+-- current context (can assign metavariables while unifying). Use it to compare a
+-- hypothesis type to `mkConst ``False`, etc. (`isDefEq` is the same function.)
+
+#check Lean.LocalDecl
+#check Lean.MVarId.withContext
+#check getLCtx
+#check inferType
+#check isExprDefEq
+
+/-- For each visible local declaration, log its user name and type (tracing must be enabled). -/
+elab "trace_locals" : tactic => do
+  let goal ← getMainGoal
+  goal.withContext do
+    for localDecl in (← getLCtx) do
+      unless localDecl.isImplementationDetail do
+        logInfo m!"local {localDecl.userName} : {← ppExpr localDecl.type}"
+
+example (a _b : Nat) (_ha : a = 0) : True := by
+  trace_locals  -- shows in "Messages" / info view when this example is elaborated
+  trivial
+
+/-- Close the goal if some hypothesis is definitionally `False`. -/
+elab "exact_false_hyp" : tactic => do
+  let goal ← getMainGoal
+  goal.withContext do
+    let falseTy := mkConst ``False
+    for localDecl in (← getLCtx) do
+      if (← isExprDefEq localDecl.type falseTy) then
+        goal.assign localDecl.toExpr
+        return
+    throwError "no hypothesis of type False"
+
+example (h : False) : False := by exact_false_hyp
+
+/-- Pick the first hypothesis whose type is defeq to `Nat`, and log `inferType` on its `Expr`. -/
+elab "trace_first_nat_hyp" : tactic => do
+  let goal ← getMainGoal
+  goal.withContext do
+    let natTy := mkConst ``Nat
+    for localDecl in (← getLCtx) do
+      if (← isExprDefEq localDecl.type natTy) then
+        let inferred ← inferType localDecl.toExpr
+        logInfo m!"found {localDecl.userName}, inferType gives: {← ppExpr inferred}"
+        return
+    logInfo "no Nat hypothesis"
+
+example (_n : Nat) : True := by
+  trace_first_nat_hyp
+  trivial
+
+-- -----------------------------------------------------------------------
 -- Exercises
 -- -----------------------------------------------------------------------
 /- Implement the following. Use getMainGoal, goal.getType, and target.isConstOf / target.isAppOf.
