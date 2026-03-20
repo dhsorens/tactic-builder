@@ -15,6 +15,21 @@ open Lean Elab Tactic
   - `macro_rules` when we only need to rewrite to existing tactic syntax
   - `elab_rules : tactic` and `evalTactic (← \`(tactic| ... $e ...))` when we
     need to splice a user-supplied term or ident into the tactic
+
+Important distinction:
+
+- `ident` is syntax for a name, like `x` or `h`
+- `term` is syntax for an expression, like `h`, `f x`, `Nat.succ n`, or `fun y => y`
+
+So when we say a tactic "accepts a variable", what usually happens is:
+- the tactic accepts some syntax from the user,
+- and that syntax is elaborated appropriately.
+
+For example:
+- `intro x` takes a binder name (`ident`)
+- `exact h` takes a term
+- `apply f` takes a term
+- `use a` takes a term
 -/
 
 -- -----------------------------------------------------------------------
