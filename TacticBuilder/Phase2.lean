@@ -22,6 +22,12 @@ example : True := by my_trivial
 elab "my_rfl" : tactic => do
   evalTactic (← `(tactic| rfl))
 
+syntax "my_rfl2" : tactic
+
+elab_rules : tactic
+  | `(tactic| my_rfl2) => do
+      evalTactic (← `(tactic| rfl))
+
 example (n : Nat) : n = n := by my_rfl
 
 -- The quotation `(tactic| ...) parses the ... as tactic syntax; ← runs it and gives you
