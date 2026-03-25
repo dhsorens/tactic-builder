@@ -17,28 +17,28 @@ open Lean Elab Tactic
 -- -----------------------------------------------------------------------
 -- Antiquotation: splice a parsed piece into a quotation
 -- -----------------------------------------------------------------------
--- We declare syntax that takes a term: "my_exact " e:term. The elaborator
+-- We declare syntax that takes a term: "my_exact_q " e:term. The elaborator
 -- receives e as Syntax. We build the tactic "exact <e>" with `(tactic| exact $e),
--- then run it. So my_exact h runs exact h.
+-- then run it. So my_exact_q h runs exact h (`_q` avoids clashing with Phase 3's `my_exact`).
 
-syntax "my_exact " term : tactic
+syntax "my_exact_q " term : tactic
 
 elab_rules : tactic
-  | `(tactic| my_exact $e) => do
+  | `(tactic| my_exact_q $e) => do
     evalTactic (← `(tactic| exact $e))
 
-example (P : Prop) (h : P) : P := by my_exact h
+example (P : Prop) (h : P) : P := by my_exact_q h
 
--- Same idea: my_apply e runs apply e.
-syntax "my_apply " term : tactic
+-- Same idea: my_apply_q e runs apply e.
+syntax "my_apply_q " term : tactic
 
 elab_rules : tactic
-  | `(tactic| my_apply $e) => do
+  | `(tactic| my_apply_q $e) => do
     evalTactic (← `(tactic| apply $e))
 
 example (P Q : Prop) (f : P → Q) (h : P) : Q := by
-  my_apply f
-  my_exact h
+  my_apply_q f
+  my_exact_q h
 
 -- -----------------------------------------------------------------------
 -- Building a term and using it in a tactic
@@ -80,7 +80,7 @@ example (P Q : Prop) (f : P → Q) (h : P) : Q := by my_exact2 (f h)
 
 -- 2. A tactic "my_constructor" that runs constructor, then on the first subgoal runs exact with a given term.
 --    So we need a variant that takes one term and does constructor; exact t on the first goal.
---    Simpler alternative: a tactic "close_with " t:term that runs exact t (same as my_exact; do it as practice).
+--    Simpler alternative: a tactic "close_with " t:term that runs exact t (same as my_exact_q; do it as practice).
 
 -- 3. A tactic that takes two terms a and b and runs "exact a" on the current goal (ignoring b), then "exact b" on the next.
 --    So it's like "exact a; exact b". Name it e.g. my_exact_exact.
